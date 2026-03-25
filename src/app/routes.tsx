@@ -5,6 +5,7 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Logout from "../pages/Logout";
 import ProtectedRoute from "./ProtectedRoute";
+import PublicOnlyRoute from "./PublicOnlyRoute";
 import Onboarding from "../pages/Onboarding";
 import Setup from "../pages/Setup";
 import Biblioteca from "../pages/Biblioteca";
@@ -20,9 +21,13 @@ export const router = createBrowserRouter([
     element: <AppLayout />,
     children: [
       { index: true, element: <Landing /> },
-      { path: "login", element: <Login /> },
-      { path: "register", element: <Register /> },
-      { path: "logout", element: <Logout /> },
+      {
+        element: <PublicOnlyRoute />,
+        children: [
+          { path: "login", element: <Login /> },
+          { path: "register", element: <Register /> },
+        ],
+      },
 
       {
         path: "app",
@@ -45,6 +50,12 @@ export const router = createBrowserRouter([
           { path: "check/:bookId", element: <Check /> },
         ],
       },
+      {
+        path: "logout",
+        element: <ProtectedRoute />,
+        children: [{ index: true, element: <Logout /> }],
+      },
+      { path: "*", element: <Navigate to="/" replace /> },
     ],
   },
 ]);
