@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Quicksand", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fredoka", ui-sans-serif, system-ui, sans-serif;
+  --font-playful: "Bubblegum Sans", cursive;
+
+  --color-blumi-pink: #FF85A1;
+  --color-blumi-pink-light: #FFE3E9;
+  --color-blumi-light-pink: #FFE3E9;
+  --color-blumi-dark-pink: #F06292;
+  --color-blumi-soft-bg: #FFF5F7;
+  --color-blumi-accent: #FFD1DC;
+  --color-blumi-purple: #B392AC;
+
+  --radius-xl-plus: 2rem;
+}
+
+@layer base {
+  body {
+    @apply bg-blumi-soft-bg text-gray-800 font-sans;
+  }
+}
+
+@keyframes floating {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-floating {
+  animation: floating 3s ease-in-out infinite;
+}
+
+.soft-shadow {
+  box-shadow: 0 4px 15px rgba(255, 105, 180, 0.2);
+}
+
+.cute-shadow {
+  box-shadow: 0 8px 0px 0px rgba(255, 133, 161, 0.2);
+}
+
+/* Date inputs: ocultamos el icono nativo para usar un botón rosita propio */
+.pink-date::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  display: block;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+}
+
+.pink-date {
+  accent-color: var(--color-blumi-pink);
+}
