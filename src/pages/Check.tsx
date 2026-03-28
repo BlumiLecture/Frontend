@@ -418,7 +418,8 @@ export default function Check() {
   const [plansHistory, setPlansHistory] = useState<any[]>([]);
 
   const [todayModalOpen, setTodayModalOpen] = useState(false);
-  const [todayUnitsDraft, setTodayUnitsDraft] = useState<number>(0);
+  // Usamos string para permitir borrar el valor completo (sin forzar 0).
+  const [todayUnitsInput, setTodayUnitsInput] = useState<string>("");
   const [todayModalError, setTodayModalError] = useState<string | null>(null);
 
   const [metaModalOpen, setMetaModalOpen] = useState(false);
@@ -536,7 +537,8 @@ export default function Check() {
 
     const current = logs[todayISO] || 0;
     const suggestedToday = plannedUnitsByISO[todayISO] ?? 0;
-    setTodayUnitsDraft(current > 0 ? current : suggestedToday);
+    const initial = current > 0 ? String(current) : suggestedToday > 0 ? String(suggestedToday) : "";
+    setTodayUnitsInput(initial);
     setTodayModalOpen(true);
   };
 
@@ -553,7 +555,7 @@ export default function Check() {
       return;
     }
 
-    const unitsRead = Number.isFinite(todayUnitsDraft) ? Math.floor(todayUnitsDraft) : 0;
+    const unitsRead = Math.floor(Number(todayUnitsInput || "0"));
     if (!Number.isFinite(unitsRead) || unitsRead < 0) {
       setTodayModalError("Escribe un número válido (0 o más).");
       return;
@@ -846,12 +848,22 @@ export default function Check() {
             <div className="mt-5">
               <label className="block text-sm font-bold text-gray-700 mb-2">Hoy: {todayISO}</label>
               <input
-                type="number"
-                min={0}
-                max={totalUnits > 0 ? totalUnits : undefined}
-                value={todayUnitsDraft}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="0"
+                value={todayUnitsInput}
                 disabled={isMutating}
-                onChange={(e) => setTodayUnitsDraft(parseInt(e.target.value || "0", 10))}
+                onChange={(e) => {
+                  const digitsOnly = e.target.value.replace(/\D+/g, "");
+                  // Evitar números fuera de rango si hay totalUnits
+                  if (totalUnits > 0 && digitsOnly) {
+                    const n = Math.min(parseInt(digitsOnly, 10) || 0, totalUnits);
+                    setTodayUnitsInput(String(n));
+                  } else {
+                    setTodayUnitsInput(digitsOnly);
+                  }
+                }}
                 className="w-full px-5 py-3 rounded-2xl border-2 border-blumi-light-pink focus:border-blumi-pink outline-none text-center font-black text-blumi-dark-pink"
               />
               {todayModalError ? (

@@ -468,7 +468,7 @@ export default function Biblioteca({ showGreeting = false }: { showGreeting?: bo
                     setDetailsFor({ ...b, status: "COMPLETED" });
                   }
                 }}
-                className="text-left group rounded-[22px] bg-white soft-shadow border border-blumi-accent/50 hover:border-blumi-pink/50 transition-all px-6 py-6 cursor-pointer"
+              className="text-left group rounded-[22px] bg-white soft-shadow border border-blumi-accent/50 hover:border-blumi-pink/50 transition-all px-6 py-6 cursor-pointer"
               >
                 <div className="flex items-start gap-4">
                   <div className="w-16 h-16 rounded-full bg-blumi-light-pink/40 border border-blumi-accent overflow-hidden flex items-center justify-center shrink-0">
