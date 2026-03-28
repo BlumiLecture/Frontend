@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { ChevronDown, Settings, LogOut, Sparkles, UserRound } from "lucide-react";
+import { ChevronDown, Settings, LogOut, UserRound } from "lucide-react";
 import { useAuth } from "./authContext";
+import logo from "../assets/logo-blumi.svg";
 
 export function BlumiHeader() {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ export function BlumiHeader() {
           onClick={() => navigate("/app/inicio")}
           role="button"
         >
-          <Sparkles className="w-6 h-6 text-blumi-pink" />
+          <img src={logo} alt="BlumiLecture" className="w-7 h-7" />
           <span className="font-display text-2xl font-bold text-blumi-dark-pink">BlumiLecture</span>
         </div>
 
