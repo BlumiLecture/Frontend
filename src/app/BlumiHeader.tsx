@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { ChevronDown, Settings, LogOut, UserRound } from "lucide-react";
 import { useAuth } from "./authContext";
-import logo from "../assets/logo-blumi.svg";
 
 export function BlumiHeader() {
   const navigate = useNavigate();
@@ -35,7 +34,9 @@ export function BlumiHeader() {
           onClick={() => navigate("/app/inicio")}
           role="button"
         >
-          <img src={logo} alt="BlumiLecture" className="w-7 h-7" />
+          <div className="w-10 h-10 bg-blumi-dark-pink rounded-full flex items-center justify-center text-white text-2xl">
+            📖
+          </div>
           <span className="font-display text-2xl font-bold text-blumi-dark-pink">BlumiLecture</span>
         </div>
 

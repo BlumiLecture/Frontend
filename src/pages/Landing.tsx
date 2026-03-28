@@ -2,7 +2,6 @@ import React from "react";
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import { Library, PenLine, Users } from "lucide-react";
-import logo from "../assets/logo-blumi.svg";
 
 function FeatureCard({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
@@ -23,7 +22,9 @@ export default function Landing() {
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-blumi-accent">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <img src={logo} alt="BlumiLecture" className="w-10 h-10" />
+            <div className="w-10 h-10 bg-blumi-dark-pink rounded-full flex items-center justify-center text-white text-2xl">
+              📖
+            </div>
             <span className="font-display text-2xl font-bold text-blumi-dark-pink tracking-tight">BlumiLecture</span>
           </div>
           <nav className="hidden md:flex gap-8 font-medium text-pink-600">
@@ -121,7 +122,9 @@ export default function Landing() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
             <div className="flex items-center gap-2">
-              <img src={logo} alt="BlumiLecture" className="w-8 h-8" />
+              <div className="w-8 h-8 bg-blumi-dark-pink rounded-full flex items-center justify-center text-white text-lg">
+                📖
+              </div>
               <span className="font-display text-xl font-bold text-blumi-dark-pink">BlumiLecture</span>
             </div>
             <div className="flex gap-6 text-pink-400">
