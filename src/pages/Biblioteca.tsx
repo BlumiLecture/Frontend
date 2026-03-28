@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { BookOpen, CheckCircle2, Flower2, Filter, Library, Plus, Search } from "lucide-react";
+import { BookOpen, Flower2, Filter, Library, Plus, Search, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { BlumiHeader } from "../app/BlumiHeader";
-import { getCachedInProgressBooks, getInProgressBooks, type InProgressBook } from "../api/services/library";
+import { getCachedInProgressBooks, getInProgressBooks, deleteBook, type InProgressBook } from "../api/services/library";
 import apiClient from "../api/axiosClient";
 import { useAuth } from "../app/authContext";
 import { PinkLoader } from "../app/PinkLoader";
@@ -257,25 +257,14 @@ export default function Biblioteca({ showGreeting = false }: { showGreeting?: bo
   const [pageCompleted, setPageCompleted] = useState(1);
   const PAGE_SIZE = 6;
   const [query, setQuery] = useState("");
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [successType, setSuccessType] = useState<"login" | "register" | "goal" | null>(null);
+  // Mensaje de éxito (login/registro/meta) ahora se maneja en `Inicio.tsx`
+  const [confirmDelete, setConfirmDelete] = useState<{ id: number; title: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [goalUnits, setGoalUnits] = useState<number | null>(null);
   const [goalPeriod, setGoalPeriod] = useState<GoalPeriod>(null);
   const [goalLoaded, setGoalLoaded] = useState(false);
 
-  useEffect(() => {
-    const type = window.localStorage.getItem("blumiShowSuccessModalType");
-    if (type === "login" || type === "register" || type === "goal") {
-      setShowSuccessModal(true);
-      setSuccessType(type as any);
-      const t = window.setTimeout(() => {
-        setShowSuccessModal(false);
-        setSuccessType(null);
-        window.localStorage.removeItem("blumiShowSuccessModalType");
-      }, 1400);
-      return () => window.clearTimeout(t);
-    }
-  }, []);
+  // (intencionalmente vacío)
 
   useEffect(() => {
     let mounted = true;
@@ -380,23 +369,7 @@ export default function Biblioteca({ showGreeting = false }: { showGreeting?: bo
         <main className="max-w-6xl mx-auto pt-16 pb-16 px-6">
           <PinkLoader title="Cargando tu biblioteca…" subtitle="Estamos acomodando tus libritos rositas." />
         </main>
-        {showSuccessModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-            <div className="bg-white rounded-3xl border-4 border-blumi-light-pink p-8 shadow-2xl max-w-sm w-full text-center">
-              <div className="mx-auto w-14 h-14 rounded-full bg-blumi-pink/10 border border-blumi-pink/30 flex items-center justify-center mb-5">
-                <CheckCircle2 className="w-8 h-8 text-blumi-pink" />
-              </div>
-              <h3 className="text-2xl font-black text-blumi-dark-pink">
-                {successType === "goal" ? "¡Objetivo guardado!" : "¡Listo!"}
-              </h3>
-              <p className="mt-2 text-sm text-slate-600 font-semibold">
-                {successType === "goal"
-                  ? "Ahora añade tus libros para empezar tu aventura."
-                  : "Bienvenida de nuevo a tu lectura."}
-              </p>
-            </div>
-          </div>
-        )}
+        
       </div>
     );
   }
@@ -411,23 +384,7 @@ export default function Biblioteca({ showGreeting = false }: { showGreeting?: bo
             {error}
           </div>
         </main>
-        {showSuccessModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-            <div className="bg-white rounded-3xl border-4 border-blumi-light-pink p-8 shadow-2xl max-w-sm w-full text-center">
-              <div className="mx-auto w-14 h-14 rounded-full bg-blumi-pink/10 border border-blumi-pink/30 flex items-center justify-center mb-5">
-                <CheckCircle2 className="w-8 h-8 text-blumi-pink" />
-              </div>
-              <h3 className="text-2xl font-black text-blumi-dark-pink">
-                {successType === "goal" ? "¡Objetivo guardado!" : "¡Listo!"}
-              </h3>
-              <p className="mt-2 text-sm text-slate-600 font-semibold">
-                {successType === "goal"
-                  ? "Ahora añade tus libros para empezar tu aventura."
-                  : "Bienvenida de nuevo a tu lectura."}
-              </p>
-            </div>
-          </div>
-        )}
+        
       </div>
     );
   }
@@ -440,23 +397,7 @@ export default function Biblioteca({ showGreeting = false }: { showGreeting?: bo
         <main className="max-w-6xl mx-auto pt-10 pb-16">
           <EmptyShelf onAdd={() => navigate("/app/setup")} />
         </main>
-        {showSuccessModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-            <div className="bg-white rounded-3xl border-4 border-blumi-light-pink p-8 shadow-2xl max-w-sm w-full text-center">
-              <div className="mx-auto w-14 h-14 rounded-full bg-blumi-pink/10 border border-blumi-pink/30 flex items-center justify-center mb-5">
-                <CheckCircle2 className="w-8 h-8 text-blumi-pink" />
-              </div>
-              <h3 className="text-2xl font-black text-blumi-dark-pink">
-                {successType === "goal" ? "¡Objetivo guardado!" : "¡Listo!"}
-              </h3>
-              <p className="mt-2 text-sm text-slate-600 font-semibold">
-                {successType === "goal"
-                  ? "Ahora añade tus libros para empezar tu aventura."
-                  : "Bienvenida de nuevo a tu lectura."}
-              </p>
-            </div>
-          </div>
-        )}
+        
       </div>
     );
   }
@@ -521,6 +462,19 @@ export default function Biblioteca({ showGreeting = false }: { showGreeting?: bo
                     <div className="text-sm font-semibold text-blumi-pink mt-1 line-clamp-1">{b.author}</div>
                     <div className="mt-3 text-xs font-black tracking-widest text-slate-400">COMPLETADO</div>
                   </div>
+                  <div className="ml-auto">
+                    <button
+                      type="button"
+                      className="p-2 rounded-lg border border-blumi-accent/60 text-slate-500 hover:text-red-600 hover:border-red-300 bg-white cursor-pointer"
+                      aria-label="Eliminar libro"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setConfirmDelete({ id: b.id, title: b.title });
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </button>
             ))}
@@ -578,6 +532,19 @@ export default function Biblioteca({ showGreeting = false }: { showGreeting?: bo
                       </div>
                     </div>
                   </div>
+                  <div className="ml-auto">
+                    <button
+                      type="button"
+                      className="p-2 rounded-lg border border-blumi-accent/60 text-slate-500 hover:text-red-600 hover:border-red-300 bg-white cursor-pointer"
+                      aria-label="Eliminar libro"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setConfirmDelete({ id: b.id, title: b.title });
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </button>
             ))}
@@ -621,17 +588,44 @@ export default function Biblioteca({ showGreeting = false }: { showGreeting?: bo
 
       {detailsFor ? <DetailsModal book={detailsFor} onClose={() => setDetailsFor(null)} /> : null}
 
-      {showSuccessModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-3xl border-4 border-blumi-light-pink p-8 shadow-2xl max-w-sm w-full text-center">
-            <div className="mx-auto w-14 h-14 rounded-full bg-blumi-pink/10 border border-blumi-pink/30 flex items-center justify-center mb-5">
-              <CheckCircle2 className="w-8 h-8 text-blumi-pink" />
+      {confirmDelete ? (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/35 p-4">
+          <div className="w-full max-w-md rounded-[26px] bg-white border-2 border-blumi-light-pink p-6 soft-shadow">
+            <div className="text-xl font-black text-slate-800">¿Eliminar libro?</div>
+            <p className="mt-2 text-sm text-slate-600">
+              Se eliminará “{confirmDelete.title}” de tu biblioteca y registros. Esta acción no se puede deshacer.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                className="px-4 py-2 rounded-xl border-2 border-blumi-light-pink text-slate-700 font-bold hover:bg-blumi-soft-bg cursor-pointer"
+                onClick={() => setConfirmDelete(null)}
+                disabled={isDeleting}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="px-4 py-2 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 cursor-pointer disabled:opacity-60"
+                onClick={async () => {
+                  if (!confirmDelete) return;
+                  setIsDeleting(true);
+                  try {
+                    await deleteBook(confirmDelete.id);
+                    setBooks((prev) => prev.filter((bk) => bk.id !== confirmDelete.id));
+                    setConfirmDelete(null);
+                  } finally {
+                    setIsDeleting(false);
+                  }
+                }}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Eliminando…" : "Sí, eliminar"}
+              </button>
             </div>
-            <h3 className="text-2xl font-black text-blumi-dark-pink">¡Listo!</h3>
-            <p className="mt-2 text-sm text-slate-600 font-semibold">Bienvenido a tu lectura.</p>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -585,7 +585,7 @@ export default function Setup() {
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">
                 Fecha meta
-                <HelpTip text="Debe ser un día de lectura válido y no puede generar más sesiones que unidades totales." />
+                <HelpTip text="Día en que finaliza tu lectura. Debe ser un día de lectura válido." />
               </label>
               <div className="relative">
                 <input

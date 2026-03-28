@@ -42,6 +42,8 @@ export default function Inicio() {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 6;
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successType, setSuccessType] = useState<"login" | "register" | "goal" | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -73,6 +75,21 @@ export default function Inicio() {
     return () => {
       mounted = false;
     };
+  }, []);
+
+  // Mostrar modal de bienvenida cuando venimos de login/registro/meta
+  useEffect(() => {
+    const type = window.localStorage.getItem("blumiShowSuccessModalType");
+    if (type === "login" || type === "register" || type === "goal") {
+      setShowSuccessModal(true);
+      setSuccessType(type as any);
+      const t = window.setTimeout(() => {
+        setShowSuccessModal(false);
+        setSuccessType(null);
+        window.localStorage.removeItem("blumiShowSuccessModalType");
+      }, 1400);
+      return () => window.clearTimeout(t);
+    }
   }, []);
 
   const filteredBooks = useMemo(() => {
@@ -222,6 +239,23 @@ export default function Inicio() {
           </button>
         </div>
       </main>
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+          <div className="bg-white rounded-3xl border-4 border-blumi-light-pink p-8 shadow-2xl max-w-sm w-full text-center">
+            <div className="mx-auto w-14 h-14 rounded-full bg-blumi-pink/10 border border-blumi-pink/30 flex items-center justify-center mb-5">
+              <CheckCircle2 className="w-8 h-8 text-blumi-pink" />
+            </div>
+            <h3 className="text-2xl font-black text-blumi-dark-pink">
+              {successType === "goal" ? "¡Objetivo guardado!" : "¡Listo!"}
+            </h3>
+            <p className="mt-2 text-sm text-slate-600 font-semibold">
+              {successType === "goal"
+                ? "Ahora añade tus libros para empezar tu aventura."
+                : "Bienvenida de nuevo a tu lectura."}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
