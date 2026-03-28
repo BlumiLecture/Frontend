@@ -79,3 +79,8 @@ export async function getCheckInfo(bookId: number) {
   };
 }
 
+export async function deleteBook(bookId: number) {
+  await apiClient.delete(`books/${bookId}/`);
+  // La eliminación afecta a las listas de libros en curso
+  invalidateInProgressBooksCache();
+}

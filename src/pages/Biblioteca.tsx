@@ -193,9 +193,11 @@ function GoalProgressCard({
 function DetailsModal({
   book,
   onClose,
+  onRequestDelete,
 }: {
   book: BookCard & { status: "ACTIVE" | "COMPLETED" };
   onClose: () => void;
+  onRequestDelete: (args: { id: number; title: string }) => void;
 }) {
   const totalUnits = book.total_units || 0;
   const totalRead = Math.round(((book.progress_percent || 0) / 100) * totalUnits);
@@ -239,6 +241,17 @@ function DetailsModal({
             <div className="text-xs font-black tracking-widest text-slate-400">FECHA META</div>
             <div className="mt-1 text-sm font-bold text-slate-700">{end || "—"}</div>
           </div>
+        </div>
+        <div className="mt-6 flex items-center justify-end">
+          <button
+            type="button"
+            aria-label="Eliminar libro"
+            className="p-3 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 cursor-pointer border border-red-200"
+            onClick={() => onRequestDelete({ id: book.id, title: book.title })}
+            title="Eliminar libro"
+          >
+            <Trash2 className="w-5 h-5" />
+          </button>
         </div>
       </div>
     </div>
@@ -444,11 +457,18 @@ export default function Biblioteca({ showGreeting = false }: { showGreeting?: bo
           <h2 className="text-xl font-black text-slate-800 mb-4">Completados</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {pagedCompleted.map((b) => (
-              <button
+              <div
                 key={`c-${b.id}`}
-                type="button"
                 onClick={() => setDetailsFor({ ...b, status: "COMPLETED" })}
-              className="text-left group rounded-[22px] bg-white soft-shadow border border-blumi-accent/50 hover:border-blumi-pink/50 transition-all px-6 py-6 cursor-pointer"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setDetailsFor({ ...b, status: "COMPLETED" });
+                  }
+                }}
+                className="text-left group rounded-[22px] bg-white soft-shadow border border-blumi-accent/50 hover:border-blumi-pink/50 transition-all px-6 py-6 cursor-pointer"
               >
                 <div className="flex items-start gap-4">
                   <div className="w-16 h-16 rounded-full bg-blumi-light-pink/40 border border-blumi-accent overflow-hidden flex items-center justify-center shrink-0">
@@ -462,21 +482,9 @@ export default function Biblioteca({ showGreeting = false }: { showGreeting?: bo
                     <div className="text-sm font-semibold text-blumi-pink mt-1 line-clamp-1">{b.author}</div>
                     <div className="mt-3 text-xs font-black tracking-widest text-slate-400">COMPLETADO</div>
                   </div>
-                  <div className="ml-auto">
-                    <button
-                      type="button"
-                      className="p-2 rounded-lg border border-blumi-accent/60 text-slate-500 hover:text-red-600 hover:border-red-300 bg-white cursor-pointer"
-                      aria-label="Eliminar libro"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setConfirmDelete({ id: b.id, title: b.title });
-                      }}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                  
                 </div>
-              </button>
+              </div>
             ))}
           </div>
           <div className="mt-6 flex items-center justify-center gap-3">
@@ -506,10 +514,17 @@ export default function Biblioteca({ showGreeting = false }: { showGreeting?: bo
           <h2 className="text-xl font-black text-slate-800 mb-4">Activos</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {pagedActive.map((b) => (
-              <button
+              <div
                 key={`a-${b.id}`}
-                type="button"
                 onClick={() => setDetailsFor({ ...b, status: "ACTIVE" })}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setDetailsFor({ ...b, status: "ACTIVE" });
+                  }
+                }}
                 className="text-left group rounded-[22px] bg-white soft-shadow border border-blumi-accent/50 hover:border-blumi-pink/50 transition-all px-6 py-6 cursor-pointer"
               >
                 <div className="flex items-start gap-4">
@@ -532,21 +547,9 @@ export default function Biblioteca({ showGreeting = false }: { showGreeting?: bo
                       </div>
                     </div>
                   </div>
-                  <div className="ml-auto">
-                    <button
-                      type="button"
-                      className="p-2 rounded-lg border border-blumi-accent/60 text-slate-500 hover:text-red-600 hover:border-red-300 bg-white cursor-pointer"
-                      aria-label="Eliminar libro"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setConfirmDelete({ id: b.id, title: b.title });
-                      }}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                  
                 </div>
-              </button>
+              </div>
             ))}
           </div>
           <div className="mt-6 flex items-center justify-center gap-3">
@@ -586,14 +589,24 @@ export default function Biblioteca({ showGreeting = false }: { showGreeting?: bo
         </div>
       </main>
 
-      {detailsFor ? <DetailsModal book={detailsFor} onClose={() => setDetailsFor(null)} /> : null}
+      {detailsFor ? (
+        <DetailsModal
+          book={detailsFor}
+          onClose={() => setDetailsFor(null)}
+          onRequestDelete={({ id, title }) => {
+            setDetailsFor(null);
+            setConfirmDelete({ id, title });
+          }}
+        />
+      ) : null}
 
       {confirmDelete ? (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/35 p-4">
           <div className="w-full max-w-md rounded-[26px] bg-white border-2 border-blumi-light-pink p-6 soft-shadow">
-            <div className="text-xl font-black text-slate-800">¿Eliminar libro?</div>
+            <div className="text-xl font-black text-slate-800">¿Eliminar este libro?</div>
             <p className="mt-2 text-sm text-slate-600">
-              Se eliminará “{confirmDelete.title}” de tu biblioteca y registros. Esta acción no se puede deshacer.
+              “{confirmDelete.title}” se borrará de tu biblioteca junto con su progreso y todos los registros de lectura.
+              Esta acción es permanente y no se puede deshacer.
             </p>
             <div className="mt-6 flex justify-end gap-3">
               <button
@@ -602,7 +615,7 @@ export default function Biblioteca({ showGreeting = false }: { showGreeting?: bo
                 onClick={() => setConfirmDelete(null)}
                 disabled={isDeleting}
               >
-                Cancelar
+                Mantener libro
               </button>
               <button
                 type="button"
@@ -620,7 +633,7 @@ export default function Biblioteca({ showGreeting = false }: { showGreeting?: bo
                 }}
                 disabled={isDeleting}
               >
-                {isDeleting ? "Eliminando…" : "Sí, eliminar"}
+                {isDeleting ? "Eliminando…" : "Eliminar definitivamente"}
               </button>
             </div>
           </div>
